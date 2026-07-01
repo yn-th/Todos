@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 # Create your models here.
 
 class Todo(models.Model):
@@ -20,4 +20,13 @@ class Todo(models.Model):
         DOING = 'DN' , 'در حال انجام'
         SEE = 'SE' , 'دیده شده '
     
+    status = models.CharField(
+        max_length=2,
+        choices=Status,
+        default=Status.SEE
+        )
+    def __str__(self):
+        return self.name
     
+    class Meta:
+        ordering = ['-created']
