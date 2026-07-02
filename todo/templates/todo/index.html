@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.tailwindcss.com"></script> 
     <title>Document</title>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen" >
+
     {% for todo in todos %}
-    <p>{{todo.name}}</p>
-    <p>{{todo.todo}}</p>
+    <div class="flex-grow container mx-auto px-4 py-8">
+    <a href = "{% url 'detail' todo.slug %}">{{todo.name}}</a>
+    <p>{{todo.body}}</p>
     <p>{{todo.get_priority_display}}</p>
     <p>{{todo.get_status_display}}</p>
-    
+    </div>
     {% endfor %}
 </body>
 </html>

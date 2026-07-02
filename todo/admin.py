@@ -4,4 +4,5 @@ from .models import Todo
 @admin.register(Todo)
 
 class AdminTodo(admin.ModelAdmin):
-    list_display = ['name','todo','priority','status']
+    list_display = ['name','body','priority','status']
+    prepopulated_fields ={'slug':('name',)}

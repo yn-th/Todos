@@ -1,13 +1,19 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.text import slugify
 # Create your models here.
 
 class Todo(models.Model):
     name = models.CharField( max_length=250)
-    todo = models.TextField()
+    body = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-
+    slug = models.SlugField(allow_unicode=True)
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name,allow_unicode=True)
+        return super().save(*args, **kwargs)
+    
     class Priority(models.TextChoices):
         HIGH = 'H' , 'بالا'
         MEDIUM = 'M' , 'متوسط'
