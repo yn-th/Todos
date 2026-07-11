@@ -10,3 +10,7 @@ def home(request):
 def detail(request , slug):
     todo = get_object_or_404(Todo,slug=slug)
     return render(request , 'todo/detail.html',{'todo':todo})
+
+
+def dashboard(request):
+    pass
