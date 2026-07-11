@@ -9,6 +9,11 @@ class Todo(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     slug = models.SlugField(allow_unicode=True)
+    assign_to = models.ForeignKey(
+        User,
+        related_name='todo',
+        on_delete=models.CASCADE
+        )
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name,allow_unicode=True)

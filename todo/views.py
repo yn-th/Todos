@@ -1,5 +1,6 @@
 from django.shortcuts import render ,get_object_or_404
 from .models import Todo
+from django.contrib.auth.models import User
 # Create your views here.
 
 def home(request):
@@ -13,4 +14,8 @@ def detail(request , slug):
 
 
 def dashboard(request):
-    pass
+    todos = Todo.objects.filter(assign_to =request.user)
+    print(User)
+    return render(request , 'todo/dashboard.html',{'todos':todos})
+
+
