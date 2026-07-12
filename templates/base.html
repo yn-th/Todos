@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}مدیریت تسک‌ها{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- فونت وزیر (اختیاری) -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap');
+        body { font-family: 'Vazirmatn', 'Tahoma', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+
+    <!-- نوار ناوبری -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="{% url 'home' %}" class="text-2xl font-bold text-indigo-600">Todo List</a>
+            <div class="flex items-center space-x-4 space-x-reverse">
+                <a href="{% url 'home' %}" class="text-gray-700 hover:text-indigo-600 transition">خانه</a>
+                <a href="{% url 'create' %}" class="text-gray-700 hover:text-indigo-600 transition">ایجاد تسک</a>
+                {% if user.is_authenticated %}
+                    <span class="text-gray-700">{{ user.username }}</span>
+                    {% comment %} <form method="POST" action="{% url 'logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="text-gray-700 hover:text-indigo-600 transition">خروج</button>
+                    </form> {% endcomment %}
+                {% else %}
+                    <a href="{% url 'login' %}" class="text-gray-700 hover:text-indigo-600 transition">ورود</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- محتوای اصلی -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- فوتر -->
+    <footer class="bg-white border-t mt-auto">
+        <div class="container mx-auto px-4 py-6 text-center text-gray-500 text-sm">
+            © {% now "Y" %} مدیریت تسک‌ها. تمامی حقوق محفوظ است.
+        </div>
+    </footer>
+
+</body>
+</html>

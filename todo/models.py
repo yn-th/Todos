@@ -14,11 +14,23 @@ class Todo(models.Model):
         related_name='todo',
         on_delete=models.CASCADE
         )
+    # def save(self, *args, **kwargs):
+    #     if not self.slug:
+    #         self.slug = slugify(self.name,allow_unicode=True)
+    #     return super().save(*args, **kwargs)
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name,allow_unicode=True)
-        return super().save(*args, **kwargs)
-    
+            base_slug = slugify(self.name, allow_unicode=True)
+            if not base_slug:                # اگر slugify خالی برگرداند
+                base_slug = 'todo'
+            # یکتا‌سازی: اگر slug تکراری بود، شماره اضافه کن
+            unique_slug = base_slug
+            counter = 1
+            while Todo.objects.filter(slug=unique_slug).exists():
+                unique_slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = unique_slug
+        super().save(*args, **kwargs)
     class Priority(models.TextChoices):
         HIGH = 'H' , 'بالا'
         MEDIUM = 'M' , 'متوسط'

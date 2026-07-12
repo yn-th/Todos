@@ -14,7 +14,7 @@ class TodoListView(ListView):
     model = Todo
     template_name = "todo/index.html"
     context_object_name = 'todos'
-    paginate_by = 3
+    paginate_by = 6
 
 class TodoDetailView(DetailView):
     model = Todo
@@ -33,6 +33,7 @@ class TodoUpdateView(UpdateView):
     template_name = "todo/update.html"
     success_url = reverse_lazy('home')
     form_class = TodoCrateForm
+
 
 
 

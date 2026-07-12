@@ -5,5 +5,5 @@ class TodoCrateForm(ModelForm):
     
     class Meta:
         model = Todo
-        fields = '__all__'
+        exclude = ['slug']
     
