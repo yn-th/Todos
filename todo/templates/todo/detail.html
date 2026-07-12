@@ -27,7 +27,7 @@
 
         <div class="flex gap-3">
             <a href="{% url 'update' todo.slug %}" class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">ویرایش</a>
-            {% comment %} <a href="{% url 'todo_delete' todo.slug %}" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">حذف</a> {% endcomment %}
+            <a href="{% url 'delete' todo.slug %}" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">حذف</a>
             <a href="{% url 'home' %}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">بازگشت</a>
         </div>
     </div>

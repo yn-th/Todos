@@ -2,19 +2,39 @@ from django.shortcuts import render ,get_object_or_404 , redirect
 from django.urls import reverse_lazy
 from .models import Todo
 from .forms import TodoCrateForm
-from django.views.generic import ListView , DetailView , CreateView ,UpdateView
+from django.views.generic import ListView , DetailView , CreateView ,UpdateView ,DeleteView
 from django.contrib.auth.models import User
-# Create your views here.
+from django.db.models import Q
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-# def home(request):
-#     todos = Todo.objects.all()
-#     return render(request , 'todo/index.html',{'todos':todos})
     
-class TodoListView(ListView):
+class TodoListView(LoginRequiredMixin,ListView):
     model = Todo
     template_name = "todo/index.html"
     context_object_name = 'todos'
     paginate_by = 6
+    
+    def get_queryset(self):
+        queryset= super().get_queryset()
+        queryset = queryset.filter(assign_to =self.request.user)
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(
+                Q(name__icontains=query)|Q(body__icontains=query)
+            )
+        priority = self.request.GET.get('priority')
+        if priority:
+            queryset = queryset.filter(Q(priority__icontains = priority))
+        
+        return queryset.order_by('-created')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["query"] = self.request.GET.get('q','') 
+        context['selected_priority'] = self.request.GET.get('priority', '')
+        return context
+    
+    
 
 class TodoDetailView(DetailView):
     model = Todo
@@ -33,6 +53,13 @@ class TodoUpdateView(UpdateView):
     template_name = "todo/update.html"
     success_url = reverse_lazy('home')
     form_class = TodoCrateForm
+
+class TodoDeleteView(DeleteView):
+    model = Todo
+    template_name = "todo/delete_confirm.html"
+    success_url = reverse_lazy('home')
+
+
 
 
 

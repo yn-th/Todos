@@ -7,7 +7,24 @@
         <h1 class="text-3xl font-bold text-gray-900">📋 تسک‌های من</h1>
         <a href="{% url 'create' %}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">+ تسک جدید</a>
     </div>
+<!-- فرم جستجو -->
+<form method="get" class="mb-6">
+    <div class="flex gap-2">
+        <input type="text" name="q" value="{{ query|default:'' }}" placeholder="جستجو در تسک‌ها..."
+               class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+        <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">جستجو</button>
+        {% if request.GET.q %}
+            <a href="{% url 'home' %}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">پاک کردن</a>
+        {% endif %}
+            <select name="priority">
+                <option value="">همه</option>
+                <option value="H" {% if selected_priority == 'H' %}selected{% endif %}>بالا</option>
+                <option value="M" {% if selected_priority == 'M' %}selected{% endif %}>متوسط</option>
+                <option value="L" {% if selected_priority == 'L' %}selected{% endif %}>پایین</option>
+            </select>
+    </div>
 
+</form>
     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {% for todo in todos %}
         <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition-shadow duration-300 flex flex-col">
@@ -28,7 +45,7 @@
             <div class="flex gap-2 mt-4 pt-4 border-t">
                 <a href="{% url 'detail' todo.slug %}" class="text-indigo-600 hover:text-indigo-800 transition text-sm">مشاهده</a>
                 <a href="{% url 'update' todo.slug %}" class="text-amber-600 hover:text-amber-800 transition text-sm">ویرایش</a>
-                {% comment %} <a href="{% url 'todo_delete' todo.slug %}" class="text-red-600 hover:text-red-800 transition text-sm">حذف</a> {% endcomment %}
+                <a href="{% url 'delete' todo.slug %}" class="text-red-600 hover:text-red-800 transition text-sm">حذف</a>
             </div>
         </div>
         {% empty %}
