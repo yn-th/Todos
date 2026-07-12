@@ -10,5 +10,6 @@
     <p>{{todo.body}}</p>
     <p>{{todo.get_status_display}}</p>
     {{todo.get_priority_display}}
+     <a href = "{% url 'update' todo.slug %}"><button type="submit">update</button></a>
 </body>
 </html>

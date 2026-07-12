@@ -8,7 +8,7 @@ class Todo(models.Model):
     body = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    slug = models.SlugField(allow_unicode=True)
+    slug = models.SlugField(allow_unicode=True,unique=True,blank=True)
     assign_to = models.ForeignKey(
         User,
         related_name='todo',
