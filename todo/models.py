@@ -54,3 +54,18 @@ class Todo(models.Model):
     
     class Meta:
         ordering = ['-created']
+
+
+class Notification(models.Model):
+    message = models.CharField(max_length=550)
+    user = models.ForeignKey(
+        User,
+        related_name='notifications',
+        on_delete=models.CASCADE
+        )
+    created = models.DateTimeField(auto_now=True)
+    is_read = models.BooleanField(default=False)
+    link = models.CharField( max_length=250)
+
+    def __str__(self):
+        return f"{self.user} - {self.message}"
