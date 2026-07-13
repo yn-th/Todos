@@ -9,6 +9,7 @@ class Todo(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     slug = models.SlugField(allow_unicode=True,unique=True,blank=True)
+    due_date = models.DateField(null=True, blank=True, verbose_name="تاریخ سررسید")
     assign_to = models.ForeignKey(
         User,
         related_name='todo',

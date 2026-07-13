@@ -44,7 +44,16 @@
                 <span id="status-text-{{ todo.id }}"  class="status-indicator">وضعیت:{{ todo.get_status_display }}</span>
                 {% comment %} <span class="status-indicator text-xs ml-2">{{ todo.get_status_display }}</span> {% endcomment %}
                 <span>{{ todo.created|date:"Y/m/d" }}</span>
+
             </div>
+            {% if todo.due_date %}
+    <div class="text-sm mt-2 
+        {% if todo.due_date < today %}text-red-600 font-semibold
+        {% elif todo.due_date == today %}text-orange-600
+        {% else %}text-gray-500{% endif %}">
+      تاریخ سر رسید:  📅 {{ todo.due_date|date:"Y/m/d" }}
+    </div>
+{% endif %}
             <div class="flex gap-2 mt-4 pt-4 border-t">
                 <a href="{% url 'detail' todo.slug %}" class="text-indigo-600 hover:text-indigo-800 transition text-sm">مشاهده</a>
                 <a href="{% url 'update' todo.slug %}" class="text-amber-600 hover:text-amber-800 transition text-sm">ویرایش</a>

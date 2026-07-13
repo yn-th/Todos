@@ -100,10 +100,22 @@ class TodoDeleteView(DeleteView):
 #     todo = get_object_or_404(Todo,slug=slug)
 #     return render(request , 'todo/detail.html',{'todo':todo})
 
+from .models import Notification
 
-def dashboard(request):
-    todos = Todo.objects.filter(assign_to =request.user)
-    print(User)
-    return render(request , 'todo/dashboard.html',{'todos':todos})
+class NotificationListView(LoginRequiredMixin, ListView):
+    model = Notification
+    template_name = 'todo/notification_list.html'
+    context_object_name = 'notifications'
+    paginate_by = 20
 
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user).order_by('-created')
 
+from django.contrib import messages
+
+@login_required
+def mark_all_read(request):
+    if request.method == 'POST':
+        Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+        messages.success(request, 'همهٔ اعلان‌ها خوانده شدند.')
+    return redirect('notification_list')

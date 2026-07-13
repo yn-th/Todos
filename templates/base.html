@@ -30,6 +30,14 @@
                 {% else %}
                     <a href="{% url 'login' %}" class="text-gray-700 hover:text-indigo-600 transition">ورود</a>
                 {% endif %}
+                <a href="{% url 'notification_list' %}" class="relative text-gray-700 hover:text-indigo-600 transition">
+    🔔
+                {% if unread_notifications_count > 0 %}
+                    <span class="absolute -top-2 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                    {{ unread_notifications_count }}
+                    </span>
+                {% endif %}
+                    </a>
             </div>
         </div>
     </nav>

@@ -23,6 +23,15 @@
             <div><strong>واگذار به:</strong> {{ todo.assign_to.username }}</div>
             <div><strong>تاریخ ایجاد:</strong> {{ todo.created|date:"Y/m/d H:i" }}</div>
             <div><strong>آخرین به‌روزرسانی:</strong> {{ todo.updated|date:"Y/m/d H:i" }}</div>
+
+{% if todo.due_date %}
+    <div class="text-sm mt-2 
+        {% if todo.due_date < today %}text-red-600 font-semibold
+        {% elif todo.due_date == today %}text-orange-600
+        {% else %}text-gray-500{% endif %}">
+        📅 {{ todo.due_date|date:"Y/m/d" }}
+    </div>
+{% endif %}
         </div>
 
         <div class="flex gap-3">

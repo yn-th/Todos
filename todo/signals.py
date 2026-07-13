@@ -10,7 +10,7 @@ def create_todo_notif(sender ,instance, created , **kwargs):
         Notification.objects.create(
             user = instance.assign_to,
             message = f"تسک جدیدی به شما ارسال شده است{instance.name}",
-            link=f'/todo/{instance.slug}/' 
+            link=f'/detail/{instance.slug}' 
         )
 
 
@@ -28,7 +28,7 @@ def change_todo_status(sender,instance,created,**kwargs):
             Notification.objects.create(
                 user = instance.assign_to,
                 message=f'وضعیت تسک "{instance.name}" از "{old_status}" به "{new_status}" تغییر کرد.',
-                link=f'/todo/{instance.slug}/'
+                link=f'/detail/{instance.slug}'
             )
 
             
