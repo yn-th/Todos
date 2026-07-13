@@ -16,7 +16,8 @@ class TodoListView(LoginRequiredMixin,ListView):
     
     def get_queryset(self):
         queryset= super().get_queryset()
-        queryset = queryset.filter(assign_to =self.request.user)
+        queryset = queryset.select_related('assign_to')
+        queryset = queryset.filter(assign_to = self.request.user)
         query = self.request.GET.get('q')
         if query:
             queryset = queryset.filter(
@@ -36,11 +37,17 @@ class TodoListView(LoginRequiredMixin,ListView):
     
     
 
-class TodoDetailView(DetailView):
+class TodoDetailView(LoginRequiredMixin,DetailView):
     model = Todo
     template_name = "todo/detail.html"
     slug_field = 'slug'
     context_object_name = 'todo'
+    
+    def get_queryset(self):
+        return super().get_queryset().select_related('assign_to').filter(
+            assign_to = self.request.user
+        )
+    
 
 class TodoCreateView(CreateView):
     model = Todo
