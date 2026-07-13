@@ -19,7 +19,7 @@
         </div>
 
         <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 bg-gray-50 rounded-lg p-4 mb-6">
-            <div><strong>وضعیت:</strong> {{ todo.get_status_display }}</div>
+            <div id="status-text-{{ todo.id }}"><strong>وضعیت:</strong> {{ todo.get_status_display }}</div>
             <div><strong>واگذار به:</strong> {{ todo.assign_to.username }}</div>
             <div><strong>تاریخ ایجاد:</strong> {{ todo.created|date:"Y/m/d H:i" }}</div>
             <div><strong>آخرین به‌روزرسانی:</strong> {{ todo.updated|date:"Y/m/d H:i" }}</div>
@@ -28,9 +28,24 @@
         <div class="flex gap-3">
             <a href="{% url 'update' todo.slug %}" class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">ویرایش</a>
             <a href="{% url 'delete' todo.slug %}" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">حذف</a>
+            
             <a href="{% url 'home' %}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">بازگشت</a>
+
+                <div class="relative">
+                    <select class="status-select border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500" data-change-url="{% url 'change_status' todo.pk %}"
+                    data-target="status-text-{{ todo.id }}">
+                        <option value="NE" {% if todo.status == 'NE' %}selected{% endif %}> -------</option>
+                        <option value="SE" {% if todo.status == 'SE' %}selected{% endif %}>دیده شده</option>
+                        <option value="DN" {% if todo.status == 'DN' %}selected{% endif %}>در حال انجام</option>
+                        <option value="DO" {% if todo.status == 'DO' %}selected{% endif %}>انجام شده</option>
+                    </select>
+                    
+                </div>
+
         </div>
     </div>
 </div>
+
+
 
 {% endblock %}

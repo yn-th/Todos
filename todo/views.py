@@ -6,7 +6,28 @@ from django.views.generic import ListView , DetailView , CreateView ,UpdateView 
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
 
+@login_required
+@require_POST
+def change_status(request, pk):
+    todo = get_object_or_404(Todo, pk=pk, assign_to=request.user)
+
+    new_status = request.POST.get('status')
+
+    valid_statuses = [choice[0] for choice in Todo.Status.choices]
+    if new_status not in valid_statuses:
+        return JsonResponse({'success': False, 'error': 'وضعیت نامعتبر است.'}, status=400)
+
+    todo.status = new_status
+    todo.save()
+    return JsonResponse({
+        'success': True,
+        'new_status': todo.get_status_display(),  # نمایش فارسی
+        'new_status_code': todo.status             # کد وضعیت (SE, DN, DO)
+    })
     
 class TodoListView(LoginRequiredMixin,ListView):
     model = Todo
@@ -17,7 +38,7 @@ class TodoListView(LoginRequiredMixin,ListView):
     def get_queryset(self):
         queryset= super().get_queryset()
         queryset = queryset.select_related('assign_to')
-        queryset = queryset.filter(assign_to = self.request.user)
+        # queryset = queryset.filter(assign_to = self.request.user)
         query = self.request.GET.get('q')
         if query:
             queryset = queryset.filter(
@@ -60,12 +81,15 @@ class TodoUpdateView(UpdateView):
     template_name = "todo/update.html"
     success_url = reverse_lazy('home')
     form_class = TodoCrateForm
+    def get_queryset(self):
+        return super().get_queryset().filter(assign_to=self.request.user)
 
 class TodoDeleteView(DeleteView):
     model = Todo
     template_name = "todo/delete_confirm.html"
     success_url = reverse_lazy('home')
-
+    def get_queryset(self):
+        return super().get_queryset().filter(assign_to=self.request.user)
 
 
 

@@ -6,3 +6,4 @@ from .models import Todo
 class AdminTodo(admin.ModelAdmin):
     list_display = ['name','body','priority','status','slug','assign_to']
     prepopulated_fields ={'slug':('name',)}
+    list_editable=['status','priority']

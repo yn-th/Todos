@@ -2,15 +2,15 @@
 {% block title %}ایجاد تسک جدید{% endblock %}
 {% block content %}
 
-<div class="max-w-2xl mx-auto">
-    <div class="bg-white rounded-2xl shadow-md p-8">
+<div class="max-w-2xl mx-auto ">
+    <div class="bg-white  rounded-2xl shadow-md p-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-8 text-center">ایجاد تسک جدید</h1>
 
         <form method="post" class="space-y-4">
             {% csrf_token %}
             {% for field in form %}
-            <div>
-                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+            <div class="">
+                <label for="{{ field.id_for_label }}" class="block border-gray-300 text-sm font-medium text-gray-700 mb-1">
                     {{ field.label }}
                 </label>
                 {{ field }}

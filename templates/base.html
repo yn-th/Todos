@@ -46,5 +46,74 @@
         </div>
     </footer>
 
+
+<script>
+
+    // ۱. تابع کمکی برای گرفتن CSRF Token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const statusSelects = document.querySelectorAll('.status-select');
+    const csrftoken = getCookie('csrftoken');
+
+    statusSelects.forEach(select => {
+        select.addEventListener('change', async (event) => {
+            const url = event.target.dataset.changeUrl;  // URL را از اینجا بگیر
+            const newStatus = event.target.value;
+
+            // ساخت FormData
+            const formData = new FormData();
+            formData.append('status', newStatus);
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrftoken,
+                        // Content-Type را خود FormData تنظیم می‌کند
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+if (data.success) {
+    const targetId = event.target.dataset.target;
+    const statusSpan = document.getElementById(targetId);
+    if (statusSpan) {
+        statusSpan.textContent = data.new_status;
+    }
+
+    // ۲. (اختیاری) افکت بصری: اضافه کردن کلاس برای یک ثانیه
+    event.target.classList.add('ring-2', 'ring-indigo-500');
+    setTimeout(() => {
+        event.target.classList.remove('ring-2', 'ring-indigo-500');
+    }, 1000);
+}
+               else {
+                    alert(data.error || 'خطا');
+                    event.target.value = event.target.dataset.previousValue;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('خطا در ارتباط با سرور');
+            }
+        });
+        select.dataset.previousValue = select.value;
+    });
+});
+</script>
 </body>
 </html>

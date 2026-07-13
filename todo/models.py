@@ -39,6 +39,7 @@ class Todo(models.Model):
     priority = models.CharField( max_length=1,choices=Priority,default=Priority.MEDIUM)
 
     class Status(models.TextChoices):
+        NEW = 'NE','-------'
         DONE = 'DO','انجام شده'
         DOING = 'DN' , 'در حال انجام'
         SEE = 'SE' , 'دیده شده '
@@ -46,7 +47,7 @@ class Todo(models.Model):
     status = models.CharField(
         max_length=2,
         choices=Status,
-        default=Status.SEE
+        default=Status.NEW
         )
     def __str__(self):
         return self.name
