@@ -19,6 +19,7 @@
         <div class="container mx-auto px-4 py-3 flex items-center justify-between">
             <a href="{% url 'home' %}" class="text-2xl font-bold text-indigo-600">Todo List</a>
             <div class="flex items-center space-x-4 space-x-reverse">
+                <a href="{% url 'user_feed' %}" class="text-gray-700 hover:text-indigo-600 transition">📰 فید</a>
                 <a href="{% url 'home' %}" class="text-gray-700 hover:text-indigo-600 transition">خانه</a>
                 <a href="{% url 'create' %}" class="text-gray-700 hover:text-indigo-600 transition">ایجاد تسک</a>
                 {% if user.is_authenticated %}

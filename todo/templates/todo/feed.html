@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}فید{% endblock %}
+{% block content %}
+
+<div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">{{ feed_title }}</h1>
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {% for todo in todos %}
+        <div class="bg-white rounded-2xl shadow-md p-6 flex flex-col">
+            <div class="flex items-start justify-between mb-3">
+                <h2 class="text-xl font-semibold text-gray-900">{{ todo.name }}</h2>
+                <span class="text-xs px-2 py-1 rounded-full 
+                    {% if todo.priority == 'H' %}bg-red-100 text-red-700
+                    {% elif todo.priority == 'M' %}bg-yellow-100 text-yellow-700
+                    {% else %}bg-green-100 text-green-700{% endif %}">
+                    {{ todo.get_priority_display }}
+                </span>
+            </div>
+            <p class="text-gray-600 text-sm mb-4 flex-grow">{{ todo.body|truncatewords:20 }}</p>
+            <div class="flex items-center justify-between text-sm text-gray-500 mt-auto">
+                <span>واگذار به: {{ todo.assign_to.username }}</span>
+                <span>{{ todo.get_status_display }}</span>
+            </div>
+            {% if todo.assign_to == request.user %}
+            <div class="flex gap-2 mt-4 pt-4 border-t">
+                <a href="{% url 'update' todo.slug %}" class="text-amber-600 hover:text-amber-800 transition text-sm">ویرایش</a>
+                <a href="{% url 'delete' todo.slug %}" class="text-red-600 hover:text-red-800 transition text-sm">حذف</a>
+            </div>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p class="text-gray-500 col-span-full text-center py-12">هنوز تسکی در فید شما وجود ندارد.</p>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <div class="flex justify-center mt-8">
+        <!-- صفحه‌بندی مشابه index.html -->
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

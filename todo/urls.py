@@ -5,7 +5,9 @@ urlpatterns = [
     # path('',views.home),
     path('',views.TodoListView.as_view(),name='home'),
     path('create/',views.TodoCreateView.as_view(),name = 'create'),
+    path('feed/', views.UserFeedView.as_view(), name='user_feed'),
     path('user/<int:pk>/follow/', views.toggle_follow, name='toggle_follow'),
+
     path('update/<str:slug>',views.TodoUpdateView.as_view(),name = 'update'),
     path('detail/<str:slug>',views.TodoDetailView.as_view() , name='detail'),
     path('delete/<str:slug>',views.TodoDeleteView.as_view() , name='delete'),

@@ -168,4 +168,30 @@ class UserListView(LoginRequiredMixin, ListView):
         context['following_ids'] = list(following_ids)
         return context
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView
+from .models import Todo, Contact
 
+class UserFeedView(LoginRequiredMixin, ListView):
+    model = Todo
+    template_name = 'todo/feed.html'
+    context_object_name = 'todos'
+    paginate_by = 10
+
+    def get_queryset(self):
+        # ۱. لیست کاربرانی که کاربر جاری دنبال می‌کند
+        following_ids = Contact.objects.filter(
+            user_from=self.request.user
+        ).values_list('user_to_id', flat=True)
+
+        # ۲. تسک‌های عمومی آن کاربران + تسک‌های عمومی خود کاربر
+        return Todo.objects.filter(
+            assign_to__in=list(following_ids) + [self.request.user.id],
+            is_public=True,
+            status__in=[Todo.Status.SEE, Todo.Status.DOING, Todo.Status.DONE]
+        ).select_related('assign_to').order_by('-created')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['feed_title'] = 'فید تسک‌های دنبال‌شده'
+        return context
