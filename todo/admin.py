@@ -4,9 +4,9 @@ from .models import Todo , Notification
 @admin.register(Todo)
 
 class AdminTodo(admin.ModelAdmin):
-    list_display = ['name','body','priority','status','slug','assign_to']
+    list_display = ['name','body','priority','status','slug','assign_to','is_public']
     prepopulated_fields ={'slug':('name',)}
-    list_editable=['status','priority']
+    list_editable=['status','priority','is_public']
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):

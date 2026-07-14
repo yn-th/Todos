@@ -10,6 +10,7 @@ class Todo(models.Model):
     updated = models.DateTimeField(auto_now=True)
     slug = models.SlugField(allow_unicode=True,unique=True,blank=True)
     due_date = models.DateField(null=True, blank=True, verbose_name="تاریخ سررسید")
+    is_public = models.BooleanField(default=False)
     assign_to = models.ForeignKey(
         User,
         related_name='todo',
@@ -70,3 +71,24 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.message}"
+
+
+
+class Contact(models.Model):
+    user_from = models.ForeignKey(
+        User,
+        related_name='rel_form_set',
+        on_delete=models.CASCADE
+        )
+    user_to = models.ForeignKey(
+        User,
+        related_name='rel_to_set',
+        on_delete=models.CASCADE
+        )
+    created = models.DateTimeField( auto_now_add=True)
+    class Meta:
+        unique_together = ('user_from', 'user_to')
+        ordering = ['-created']
+
+    def __str__(self):
+        return f'{self.user_from.username} → {self.user_to.username}'

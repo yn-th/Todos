@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}کاربران{% endblock %}
+{% block content %}
+
+<main class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8 text-center">کاربران</h1>
+
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {% for user_obj in users %}
+            <div class="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold">
+                        {{ user_obj.username|slice:":1" }}
+                    </div>
+                    <span class="font-medium text-gray-900">{{ user_obj.username }}</span>
+                </div>
+                <button class="follow-btn px-3 py-1 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition text-sm"
+                        data-user-id="{{ user_obj.id }}"
+                        data-followed="{% if user_obj.id in following_ids %}true{% else %}false{% endif %}">
+                    {% if user_obj.id in following_ids %}لغو دنبال{% else %}دنبال کردن{% endif %}
+                </button>
+            </div>
+        {% empty %}
+            <p class="text-gray-500 col-span-full text-center">کاربر دیگری وجود ندارد.</p>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <!-- صفحه‌بندی (اختیاری، مشابه index.html) -->
+    {% endif %}
+</main>
+
+<script>
+    // تابع getCookie (همان که قبلاً نوشتیم)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const followBtns = document.querySelectorAll('.follow-btn');
+        const csrftoken = getCookie('csrftoken');
+
+        followBtns.forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const userId = btn.dataset.userId;
+                const url = `/user/${userId}/follow/`;  
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrftoken,
+                        }
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        btn.dataset.followed = data.followed;
+                        btn.textContent = data.followed ? 'لغو دنبال' : 'دنبال کردن';
+                        if (data.followed) {
+                            btn.classList.remove('bg-indigo-100', 'text-indigo-700');
+                            btn.classList.add('bg-red-100', 'text-red-700');
+                        } else {
+                            btn.classList.remove('bg-red-100', 'text-red-700');
+                            btn.classList.add('bg-indigo-100', 'text-indigo-700');
+                        }
+                    } else {
+                        alert(data.error || 'خطا');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('خطا در ارتباط با سرور');
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

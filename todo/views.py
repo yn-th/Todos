@@ -1,6 +1,6 @@
 from django.shortcuts import render ,get_object_or_404 , redirect
 from django.urls import reverse_lazy
-from .models import Todo
+from .models import Todo,Contact
 from .forms import TodoCrateForm
 from django.views.generic import ListView , DetailView , CreateView ,UpdateView ,DeleteView
 from django.contrib.auth.models import User
@@ -38,7 +38,7 @@ class TodoListView(LoginRequiredMixin,ListView):
     def get_queryset(self):
         queryset= super().get_queryset()
         queryset = queryset.select_related('assign_to')
-        # queryset = queryset.filter(assign_to = self.request.user)
+        queryset = queryset.filter(assign_to = self.request.user)
         query = self.request.GET.get('q')
         if query:
             queryset = queryset.filter(
@@ -119,3 +119,53 @@ def mark_all_read(request):
         Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
         messages.success(request, 'همهٔ اعلان‌ها خوانده شدند.')
     return redirect('notification_list')
+
+
+
+@login_required
+@require_POST
+def toggle_follow(request, pk):
+    target_user = get_object_or_404(User, pk=pk)
+    
+    if request.user == target_user:
+        return JsonResponse({
+            'success': False,
+            'error': 'نمی‌توانید خودتان را دنبال کنید.'
+        }, status=400)
+
+    # بررسی می‌کنیم که آیا رابطه از قبل وجود دارد
+    contact = Contact.objects.filter(user_from=request.user, user_to=target_user).first()
+    
+    if contact:
+        contact.delete()
+        followed = False
+    else:
+        Contact.objects.create(user_from=request.user, user_to=target_user)
+        followed = True
+
+    return JsonResponse({
+        'success': True,
+        'followed': followed,
+        'follower_count': target_user.rel_to_set.count() 
+    })
+
+class UserListView(LoginRequiredMixin, ListView):
+    model = User
+    template_name = 'todo/user_list.html'
+    context_object_name = 'users'
+    paginate_by = 20
+
+    def get_queryset(self):
+        # کاربر جاری را از لیست حذف می‌کنیم
+        return User.objects.exclude(id=self.request.user.id)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # کاربرانی که کاربر جاری دنبال می‌کند
+        following_ids = Contact.objects.filter(
+            user_from=self.request.user
+        ).values_list('user_to', flat=True)
+        context['following_ids'] = list(following_ids)
+        return context
+
+
