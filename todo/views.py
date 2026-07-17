@@ -193,10 +193,3 @@ class UserFeedView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['feed_title'] = 'فید تسک‌های دنبال‌شده'
         return context
-
-
-def some(request):
-    pass
-
-def add_todo_liiiiiiiiiist():
-    pass
