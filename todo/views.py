@@ -197,3 +197,6 @@ class UserFeedView(LoginRequiredMixin, ListView):
 
 def some(request):
     pass
+
+def add_todo_liiiiiiiiiist():
+    pass
