@@ -1,0 +1,12 @@
+
+
+POST http://127.0.0.1:8000/api/todos/
+Content-Type: application/json
+
+{
+    "name":"test from DRF",
+    "body":"this is a drf test!",
+    "priority":"h",
+    "status":"SE",
+    "assign_to":1
+}
