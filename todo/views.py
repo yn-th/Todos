@@ -1,12 +1,12 @@
-from django.shortcuts import render ,get_object_or_404 , redirect
-from django.urls import reverse_lazy
+from django.shortcuts import render ,get_object_or_404 , redirect 
+from django.urls import reverse_lazy 
 from .models import Todo,Contact
 from .forms import TodoCrateForm
 from django.views.generic import ListView , DetailView , CreateView ,UpdateView ,DeleteView
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
+from django.http import JsonResponse ,Http404
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 
@@ -210,3 +210,26 @@ class TodoListAPI(APIView):
             return Response(serializer.data,status=201)
         return Response(serializer.errors,status=400)
 
+class TodoDetailAPI(APIView):
+    def get_object(self,slug):
+        try:
+            return Todo.objects.get(slug=slug)
+        except Todo.DoesNotExist:
+            raise Http404
+        
+    def get(self , request , slug):
+        todo = self.get_object(slug)
+        serializer = Todoserializers(todo)
+        return Response(serializer.data)
+    def put(self,request,slug):
+        todo = self.get_object(slug)
+        serializer = Todoserializers(todo, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors,status=400)
+    def delete(self,request,slug):
+        todo = self.get_object(slug)
+        todo.delete()
+        return Response(status=204)
+    

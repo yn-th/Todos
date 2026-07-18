@@ -17,4 +17,5 @@ urlpatterns = [
     path('users/',views.UserListView.as_view(), name='user_list'),
 ###################-----API----###########################################
     path('api/todos/', views.TodoListAPI.as_view(), name='todo_api_list'),
+    path('api/todos/<str:slug>/', views.TodoDetailAPI.as_view(), name='todo_api_detail'),
 ]
