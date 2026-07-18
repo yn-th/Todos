@@ -168,7 +168,6 @@ class UserListView(LoginRequiredMixin, ListView):
         context['following_ids'] = list(following_ids)
         return context
 
-from .models import Todo, Contact
 
 class UserFeedView(LoginRequiredMixin, ListView):
     model = Todo
@@ -193,3 +192,7 @@ class UserFeedView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['feed_title'] = 'فید تسک‌های دنبال‌شده'
         return context
+
+
+class ManagerListView(ListView):
+    pass
