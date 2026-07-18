@@ -193,6 +193,12 @@ class UserFeedView(LoginRequiredMixin, ListView):
         context['feed_title'] = 'فید تسک‌های دنبال‌شده'
         return context
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .serializers import Todoserializers
 
-class ManagerListView(ListView):
-    pass
+class TodoListAPI(APIView):
+    def get(self,request):
+        todos = Todo.objects.all()
+        serializers = Todoserializers(todos , many = True)
+        return Response(serializers.data)
