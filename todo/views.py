@@ -197,39 +197,66 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import Todoserializers
 
-class TodoListAPI(APIView):
-    def get(self,request):
-        todos = Todo.objects.all()
-        serializers = Todoserializers(todos , many = True)
-        return Response(serializers.data)
+# class TodoListAPI(APIView):
+#     def get(self,request):
+#         todos = Todo.objects.all()
+#         serializers = Todoserializers(todos , many = True)
+#         return Response(serializers.data)
     
-    def post(self , request):
-        serializer = Todoserializers(data = request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data,status=201)
-        return Response(serializer.errors,status=400)
+#     def post(self , request):
+#         serializer = Todoserializers(data = request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data,status=201)
+#         return Response(serializer.errors,status=400)
 
-class TodoDetailAPI(APIView):
-    def get_object(self,slug):
-        try:
-            return Todo.objects.get(slug=slug)
-        except Todo.DoesNotExist:
-            raise Http404
-        
-    def get(self , request , slug):
-        todo = self.get_object(slug)
-        serializer = Todoserializers(todo)
-        return Response(serializer.data)
-    def put(self,request,slug):
-        todo = self.get_object(slug)
-        serializer = Todoserializers(todo, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors,status=400)
-    def delete(self,request,slug):
-        todo = self.get_object(slug)
-        todo.delete()
-        return Response(status=204)
+# class TodoDetailAPI(APIView):
+#     def get_object(self,slug):
+#         try:
+#             return Todo.objects.get(slug=slug)
+#         except Todo.DoesNotExist:
+#             raise Http404
+
+#     def get(self , request , slug):
+#         todo = self.get_object(slug)
+#         serializer = Todoserializers(todo)
+#         return Response(serializer.data)
+#     def put(self,request,slug):
+#         todo = self.get_object(slug)
+#         serializer = Todoserializers(todo, data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data)
+#         return Response(serializer.errors,status=400)
+#     def delete(self,request,slug):
+#         todo = self.get_object(slug)
+#         todo.delete()
+#         return Response(status=204)
+    
+
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
+
+class TodoDetailAPI(RetrieveUpdateDestroyAPIView):
+    queryset = Todo.objects.all()
+    serializer_class = Todoserializers
+    lookup_field = 'slug'
+
+
+from rest_framework.generics import ListCreateAPIView
+from rest_framework import filters 
+
+class TodoListAPI(ListCreateAPIView):
+    queryset = Todo.objects.all()
+    serializer_class = Todoserializers
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name','body']
+    # pagination_class = pagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        priority = self.request.GET.get('priority')
+        if priority:
+            queryset = queryset.filter(priority=priority)
+
+        return queryset
     
