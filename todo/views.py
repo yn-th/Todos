@@ -197,7 +197,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import Todoserializers
 
-# class TodoListAPI(APIView):
+class TodoListAPI(APIView):
+    pass
 #     def get(self,request):
 #         todos = Todo.objects.all()
 #         serializers = Todoserializers(todos , many = True)
@@ -237,26 +238,92 @@ from .serializers import Todoserializers
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 
 class TodoDetailAPI(RetrieveUpdateDestroyAPIView):
-    queryset = Todo.objects.all()
-    serializer_class = Todoserializers
-    lookup_field = 'slug'
+    pass
+#     queryset = Todo.objects.all()
+#     serializer_class = Todoserializers
+#     lookup_field = 'slug'
 
 
 from rest_framework.generics import ListCreateAPIView
 from rest_framework import filters 
 
 class TodoListAPI(ListCreateAPIView):
-    queryset = Todo.objects.all()
+    pass
+#     queryset = Todo.objects.all()
+#     serializer_class = Todoserializers
+#     filter_backends = [filters.SearchFilter]
+#     search_fields = ['name','body']
+#     # pagination_class = pagination
+
+#     def get_queryset(self):
+#         queryset = super().get_queryset()
+#         priority = self.request.GET.get('priority')
+#         if priority:
+#             queryset = queryset.filter(priority=priority)
+
+#         return queryset
+    
+
+# from rest_framework import viewsets
+# from datetime import date
+# from .permissions import IsOwner
+
+# class TodoViewSet(viewsets.ModelViewSet):
+#     queryset = Todo.objects.all()
+#     serializer_class = Todoserializers
+#     lookup_field = 'slug'
+#     filter_backends = [filters.SearchFilter]
+#     search_fields = ['name','body']
+#     permission_classes = [IsOwner]
+#     def get_queryset(self):
+#         queryset= super().get_queryset()
+#         priority = self.request.GET.get('priority')
+#         if priority:
+#             queryset = queryset.filter(priority=priority)
+
+#         return queryset
+
+
+from rest_framework import viewsets, filters
+from rest_framework.permissions import IsAuthenticated
+from datetime import date
+from .models import Todo
+from .serializers import Todoserializers
+from .permissions import IsOwner
+
+class TodoViewSet(viewsets.ModelViewSet):
     serializer_class = Todoserializers
+    lookup_field = 'slug'
     filter_backends = [filters.SearchFilter]
-    search_fields = ['name','body']
-    # pagination_class = pagination
+    search_fields = ['name', 'body']
+
+    def get_permissions(self):
+        # برای اعمال Permission های مختلف به Action های متفاوت
+        if self.action in ['list', 'create']:
+            self.permission_classes = [IsAuthenticated]
+        else:  # retrieve, update, partial_update, destroy
+            self.permission_classes = [IsAuthenticated, IsOwner]
+        return super().get_permissions()
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        # پایه: فقط تسک‌های کاربر جاری
+        queryset = Todo.objects.filter(assign_to=self.request.user)
+        # فیلتر priority
         priority = self.request.GET.get('priority')
         if priority:
             queryset = queryset.filter(priority=priority)
+        # فیلتر status
+        status = self.request.GET.get('status')
+        if status:
+            queryset = queryset.filter(status=status)
+        # فیلتر due_date
+        due_date = self.request.GET.get('due_date')
+        if due_date == 'overdue':
+            queryset = queryset.filter(due_date__lte=date.today())
+        elif due_date == 'today':
+            queryset = queryset.filter(due_date=date.today())
+        return queryset.order_by('-created')
 
-        return queryset
-    
+    def perform_create(self, serializer):
+        # خودکار assign_to را پر کن
+        serializer.save(assign_to=self.request.user)
