@@ -290,12 +290,15 @@ from datetime import date
 from .models import Todo
 from .serializers import Todoserializers
 from .permissions import IsOwner
+from .filters import TodoFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 class TodoViewSet(viewsets.ModelViewSet):
     serializer_class = Todoserializers
     lookup_field = 'slug'
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [filters.SearchFilter,DjangoFilterBackend]
     search_fields = ['name', 'body']
+    filterset_class = TodoFilter
 
     def get_permissions(self):
         # برای اعمال Permission های مختلف به Action های متفاوت
@@ -306,23 +309,8 @@ class TodoViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
 
     def get_queryset(self):
-        # پایه: فقط تسک‌های کاربر جاری
-        queryset = Todo.objects.filter(assign_to=self.request.user)
-        # فیلتر priority
-        priority = self.request.GET.get('priority')
-        if priority:
-            queryset = queryset.filter(priority=priority)
-        # فیلتر status
-        status = self.request.GET.get('status')
-        if status:
-            queryset = queryset.filter(status=status)
-        # فیلتر due_date
-        due_date = self.request.GET.get('due_date')
-        if due_date == 'overdue':
-            queryset = queryset.filter(due_date__lte=date.today())
-        elif due_date == 'today':
-            queryset = queryset.filter(due_date=date.today())
-        return queryset.order_by('-created')
+        return Todo.objects.filter(assign_to=self.request.user).order_by('-created')
+     
 
     def perform_create(self, serializer):
         # خودکار assign_to را پر کن
