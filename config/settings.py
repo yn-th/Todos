@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_filters',
+    'drf_spectacular',
 
     'todo',
 ]
@@ -53,6 +54,19 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 2, 
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',   # برای کاربران ناشناس (Anonymous)
+        'rest_framework.throttling.UserRateThrottle',   # برای کاربران لاگین‌شده
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/minute',      # کاربر ناشناس: ۱۰ درخواست در دقیقه
+        'user': '1000/day',       # کاربر لاگین‌شده: ۱۰۰۰ درخواست در روز
+    }
 }
 
 SIMPLE_JWT = {
@@ -142,3 +156,21 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Todo API',                    # عنوان پروژه در مستندات
+    'DESCRIPTION': 'یک API قدرتمند برای مدیریت تسک‌ها',  # توضیح کوتاه
+    'VERSION': '1.0.0',                    # نسخهٔ API
+    'SERVE_INCLUDE_SCHEMA': False,         # مسیر schema را در مستندات مخفی کن
+    # تنظیمات امنیتی برای JWT (اختیاری ولی خوب)
+    'SECURITY': [
+        {
+            'Bearer': {
+                'type': 'apiKey',
+                'name': 'Authorization',
+                'in': 'header',
+                'description': 'توکن JWT را به صورت "Bearer <توکن>" وارد کنید.',
+            }
+        }
+    ],
+}
