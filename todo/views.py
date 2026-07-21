@@ -292,6 +292,7 @@ from .serializers import Todoserializers
 from .permissions import IsOwner
 from .filters import TodoFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action
 
 class TodoViewSet(viewsets.ModelViewSet):
     serializer_class = Todoserializers
@@ -315,3 +316,11 @@ class TodoViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # خودکار assign_to را پر کن
         serializer.save(assign_to=self.request.user)
+
+    @action(detail=True, methods=['post'], url_path='mark-done')
+    def mark_done(self, request, slug=None):
+      
+        todo = self.get_object()  # به‌طور خودکار شیء را با lookup_field (slug) پیدا می‌کند
+        todo.status = Todo.Status.DONE
+        todo.save()
+        return Response({'status': 'تسک با موفقیت انجام شد.', 'new_status': todo.get_status_display()})
