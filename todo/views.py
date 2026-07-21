@@ -324,3 +324,22 @@ class TodoViewSet(viewsets.ModelViewSet):
         todo.status = Todo.Status.DONE
         todo.save()
         return Response({'status': 'تسک با موفقیت انجام شد.', 'new_status': todo.get_status_display()})
+    
+    @action(detail=False,methods=['get'],url_path='stats')
+    def stats(self,request):
+        user = self.request.user
+        total = Todo.objects.filter(assign_to = user).count()
+        done = Todo.objects.filter(assign_to=user , status ='DO').count()
+        return Response({
+            'total':total,
+            'done':done,
+            'pending':total-done,
+        })
+    
+    @action(detail=False,methods=['get'],url_path='overdue')
+    def overdue_task(self,request):
+        overdue = self.get_queryset().filter(
+            due_date__lte = date.today(),
+            status__in = [Todo.Status.SEE ,Todo.Status.DOING],
+            
+        )
