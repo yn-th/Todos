@@ -341,5 +341,12 @@ class TodoViewSet(viewsets.ModelViewSet):
         overdue = self.get_queryset().filter(
             due_date__lte = date.today(),
             status__in = [Todo.Status.SEE ,Todo.Status.DOING],
-            
+
         )
+        page = self.paginate_queryset(overdue)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(overdue, many=True)
+        return Response(serializer.data)
