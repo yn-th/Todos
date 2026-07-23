@@ -12,6 +12,7 @@ services:
       - .env
     depends_on:
       - db
+      - redis
 
   db:
     image: postgres:14
@@ -21,5 +22,24 @@ services:
       POSTGRES_DB: todo_db
       POSTGRES_USER: todo_user
       POSTGRES_PASSWORD: todo_password
+
+
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  celery_worker:
+    build: .
+    command: celery -A config worker --loglevel=info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - web
+      - redis
+
 volumes:
   postgres_data:
