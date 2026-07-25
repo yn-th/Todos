@@ -350,3 +350,7 @@ class TodoViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(overdue, many=True)
         return Response(serializer.data)
+
+
+def some_change(request):
+    pass
