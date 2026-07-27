@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     build: .
@@ -11,8 +9,10 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_started
+      redis:
+        condition: service_healthy
 
   db:
     image: postgres:14
@@ -23,12 +23,15 @@ services:
       POSTGRES_USER: todo_user
       POSTGRES_PASSWORD: todo_password
 
-
-
-  redis:
+  redis:                     # <-- این باید در این سطح باشد، نه داخل web
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   celery_worker:
     build: .
@@ -38,8 +41,10 @@ services:
     env_file:
       - .env
     depends_on:
-      - web
-      - redis
+      web:
+        condition: service_started
+      redis:
+        condition: service_healthy
 
 volumes:
   postgres_data:
