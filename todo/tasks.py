@@ -31,8 +31,25 @@ def send_due_date_reminders():
                 [user.email],
                 fail_silently=False,
             )
-        else:
-            print('kos nnanaat')
+
+
+from datetime import timedelta
+from .models import Notification
+
+@shared_task
+def cleanup_old_notifications():
+    """
+    اعلان‌هایی که بیش از ۳۰ روز از ایجادشان گذشته و خوانده شده‌اند را حذف می‌کند.
+    """
+    cutoff = timezone.now() - timedelta(days=1)
+    deleted_count, _ = Notification.objects.filter(
+        created__lt=cutoff,
+        is_read=True
+    ).delete()
+    
+    print(f"پاک‌سازی انجام شد. {deleted_count} اعلان قدیمی حذف شدند.")
+    return deleted_count
+
 
 @shared_task
 def test_email():
