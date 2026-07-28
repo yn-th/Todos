@@ -2,16 +2,30 @@ from django.db.models.signals import post_save , post_init
 from django.dispatch import receiver 
 from django.contrib.auth.models import User
 from .models import Todo , Notification
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 @receiver(post_save , sender=Todo)
 
 def create_todo_notif(sender ,instance, created , **kwargs):
     if created:
-        Notification.objects.create(
+        notification =  Notification.objects.create(
             user = instance.assign_to,
             message = f"تسک جدیدی به شما ارسال شده است{instance.name}",
             link=f'/detail/{instance.slug}' 
         )
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'user_{notification.user.id}',
+    {
+        'type': 'send_notification',
+        'data': {
+            'message': notification.message,
+            'unread_count': Notification.objects.filter(user=notification.user, is_read=False).count(),
+        }
+    }
+)
+
 
 
 @receiver(post_init , sender=Todo)

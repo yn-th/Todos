@@ -27,7 +27,7 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost', cast=Csv())
-
+ASGI_APPLICATION = 'config.asgi.application'
 
 
 # Application definition
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'drf_spectacular',
+    'channels',
 
     'todo',
 ]
@@ -182,3 +183,25 @@ CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'send-due-date-reminders-every-day': {
+        'task': 'todo.tasks.send_due_date_reminders',
+        'schedule': crontab(hour=8, minute=0),   # هر روز ساعت ۸ صبح
+    },
+    'cleanup-old-notifications-weekly': {
+        'task': 'todo.tasks.cleanup_old_notifications',
+        'schedule': crontab(hour=3, minute=0, day_of_week=1),  # هر دوشنبه ساعت ۳ صبح
+    },
+}
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('redis', 6379)],
+        },
+    },
+}

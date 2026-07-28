@@ -54,7 +54,31 @@
             © {% now "Y" %} مدیریت تسک‌ها. تمامی حقوق محفوظ است.
         </div>
     </footer>
+<script>
+    const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const wsUrl = `${wsScheme}://${window.location.host}/ws/notifications/`;
+    const socket = new WebSocket(wsUrl);
 
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        // به‌روزرسانی شمارندهٔ زنگوله
+        const badge = document.getElementById('notification-badge');
+        if (badge) {
+            if (data.unread_count > 0) {
+                badge.textContent = data.unread_count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+        // نمایش یک توست یا پیام (اختیاری)
+        console.log('New notification:', data.message);
+    };
+
+    socket.onclose = function(e) {
+        console.error('Notification socket closed unexpectedly');
+    };
+</script>
 
 <script>
 
