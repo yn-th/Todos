@@ -62,3 +62,25 @@ def test_email():
         fail_silently=False,
     )
     print("Email sent successfully")
+
+
+
+@shared_task
+def test_websocket_message(user_id):
+    """
+    یک پیام تستی به WebSocket کاربر ارسال می‌کند.
+    """
+    from channels.layers import get_channel_layer
+    from asgiref.sync import async_to_sync
+    
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'user_{user_id}',
+        {
+            'type': 'send_notification',
+            'data': {
+                'message': 'پیام تستی از WebSocket',
+                'unread_count': 999,
+            }
+        }
+    )

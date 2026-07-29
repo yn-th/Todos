@@ -16,19 +16,41 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 # application = get_asgi_application()
 
 
+# import os
+# from django.core.asgi import get_asgi_application
+# from channels.routing import ProtocolTypeRouter, URLRouter
+# from channels.auth import AuthMiddlewareStack
+# import todo.routing  
+
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+
+# application = ProtocolTypeRouter({
+#     'http': get_asgi_application(),
+#     'websocket': AuthMiddlewareStack(
+#         URLRouter(
+#             todo.routing.websocket_urlpatterns
+#         )
+#     ),
+# })
+
 import os
 from django.core.asgi import get_asgi_application
-from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
-import todo.routing  
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-application = ProtocolTypeRouter({
-    'http': get_asgi_application(),
-    'websocket': AuthMiddlewareStack(
-        URLRouter(
-            todo.routing.websocket_urlpatterns
-        )
-    ),
-})
+# فقط در محیط داکر (وقتی USE_REDIS=True) وب‌سوکت را فعال کن
+if os.environ.get('USE_REDIS', 'False').lower() == 'true':
+    from channels.routing import ProtocolTypeRouter, URLRouter
+    from channels.auth import AuthMiddlewareStack
+    import todo.routing
+
+    application = ProtocolTypeRouter({
+        'http': get_asgi_application(),
+        'websocket': AuthMiddlewareStack(
+            URLRouter(
+                todo.routing.websocket_urlpatterns
+            )
+        ),
+    })
+else:
+    application = get_asgi_application()

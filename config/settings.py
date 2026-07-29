@@ -99,6 +99,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'todo.context_processors.notification_count',
+                'todo.context_processors.use_redis',
             ],
         },
     },
@@ -179,10 +180,10 @@ SPECTACULAR_SETTINGS = {
 }
 
 # Celery Configuration
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+# CELERY_BROKER_URL = 'redis://redis:6379/0'
+# CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 from celery.schedules import crontab
@@ -197,11 +198,43 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=3, minute=0, day_of_week=1),  # هر دوشنبه ساعت ۳ صبح
     },
 }
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [('redis', 6379)],
+
+
+import os
+
+USE_REDIS = os.environ.get('USE_REDIS', 'True').lower() == 'true'
+
+if USE_REDIS:
+    CELERY_BROKER_URL = 'redis://redis:6379/0'
+    CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [('redis', 6379)],
+            },
         },
-    },
-}
+    }
+else:
+    # برای توسعهٔ محلی: از یک بروکر ساده و لایهٔ InMemory استفاده کن
+    CELERY_BROKER_URL = 'memory://'
+    CELERY_RESULT_BACKEND = 'cache+memory://'
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
+
+# CHANNEL_LAYERS = {
+#         'default': {
+#             'BACKEND': 'channels.layers.InMemoryChannelLayer',
+#         },
+#     }
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             'hosts': [('redis', 6379)],
+#         },
+#     },
+# }

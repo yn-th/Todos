@@ -54,6 +54,8 @@
             © {% now "Y" %} مدیریت تسک‌ها. تمامی حقوق محفوظ است.
         </div>
     </footer>
+
+    {% if USE_REDIS %}
 <script>
     const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
     const wsUrl = `${wsScheme}://${window.location.host}/ws/notifications/`;
@@ -61,6 +63,8 @@
 
     socket.onmessage = function(e) {
         const data = JSON.parse(e.data);
+        // ... کد به‌روزرسانی زنگوله
+              const data = JSON.parse(e.data);
         // به‌روزرسانی شمارندهٔ زنگوله
         const badge = document.getElementById('notification-badge');
         if (badge) {
@@ -74,14 +78,9 @@
         // نمایش یک توست یا پیام (اختیاری)
         console.log('New notification:', data.message);
     };
-
-    socket.onclose = function(e) {
-        console.error('Notification socket closed unexpectedly');
-    };
 </script>
-
+{% endif %}
 <script>
-
     // ۱. تابع کمکی برای گرفتن CSRF Token
 function getCookie(name) {
     let cookieValue = null;

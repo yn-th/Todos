@@ -9,3 +9,9 @@ def notification_count(request):
         count = 0
     today = date.today()
     return {'unread_notifications_count': count,'today':today}
+
+
+import os
+
+def use_redis(request):
+    return {'USE_REDIS': os.environ.get('USE_REDIS', 'False').lower() == 'true'}
