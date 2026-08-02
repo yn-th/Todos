@@ -61,16 +61,30 @@ def create_todo_notif(sender ,instance, created , **kwargs):
 def store_pre_status(sender , instance , **kwargs):
     instance._old_status = instance.status
 
-@receiver(post_save , sender=Todo)
-def change_todo_status(sender,instance,created,**kwargs):
+
+@receiver(post_save, sender=Todo)
+def change_todo_status(sender, instance, created, **kwargs):
     if not created:
-        old_status = getattr(instance , '_old_status',None)
+        old_status = getattr(instance, '_old_status', None)
         new_status = instance.status
         if old_status and old_status != new_status:
-            Notification.objects.create(
-                user = instance.assign_to,
+            notification = Notification.objects.create(
+                user=instance.assign_to,
                 message=f'وضعیت تسک "{instance.name}" از "{old_status}" به "{new_status}" تغییر کرد.',
                 link=f'/detail/{instance.slug}'
             )
-
+            # ارسال اعلان Real-time
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f'user_{notification.user.id}',
+                {
+                    'type': 'send_notification',
+                    'data': {
+                        'message': notification.message,
+                        'unread_count': Notification.objects.filter(
+                            user=notification.user, is_read=False
+                        ).count(),
+                    }
+                }
+            )
             

@@ -33,17 +33,17 @@ ASGI_APPLICATION = 'config.asgi.application'
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    'daphne',
+    'django.contrib.staticfiles',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'rest_framework',
     'django_filters',
     'drf_spectacular',
-    'daphne',
     'channels',
+    'django.contrib.admin',
     
 
     'todo',
@@ -207,37 +207,12 @@ CELERY_BEAT_SCHEDULE = {
 import os
 USE_REDIS = os.environ.get('USE_REDIS', 'True').lower() == 'true'
 
-if USE_REDIS:
-    CELERY_BROKER_URL = 'redis://redis:6379/0'
-    CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
-    CHANNEL_LAYERS = {
-        'default': {
-            'BACKEND': 'channels.db.DatabaseChannelLayer',
-            'CONFIG': {
-                'django_db': 'default',
-            },
-        },
-    }
-  
-else:
-    CELERY_BROKER_URL = 'memory://'
-    CELERY_RESULT_BACKEND = 'cache+memory://'
-    CHANNEL_LAYERS = {
-        'default': {
-            'BACKEND': 'channels.layers.InMemoryChannelLayer',
-        },
-    }
 
-# CHANNEL_LAYERS = {
-#         'default': {
-#             'BACKEND': 'channels.layers.InMemoryChannelLayer',
-#         },
-#     }
-# CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         'CONFIG': {
-#             'hosts': [('redis', 6379)],
-#         },
-#     },
-# }
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
+
