@@ -63,11 +63,14 @@
             class="relative text-gray-700 hover:text-indigo-600 transition"
           >
             🔔 {% if unread_notifications_count > 0 %}
-            <span
+            <span data-notification-badge
+
               class="absolute -top-2 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full"
             >
               {{ unread_notifications_count }}
             </span>
+            {% else %}
+                <span data-notification-badge class="hidden"></span>
             {% endif %}
           </a>
         </div>
@@ -87,27 +90,50 @@
         © {% now "Y" %} مدیریت تسک‌ها. تمامی حقوق محفوظ است.
       </div>
     </footer>
+<input id="tokenInput" placeholder="Access Token" size="60">
+<button onclick="connectWS()">Connect</button>
+<button onclick="sendTestTask()">Send Test Task</button>
 
-    <script>
-      console.log("WebSocket script loaded");
-      const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
-      const wsUrl = `${wsScheme}://${window.location.host}/ws/notifications/`;
-      const socket = new WebSocket(wsUrl);
 
-      socket.onopen = function (e) {
-        console.log("WebSocket connected successfully!");
-      };
-      socket.onmessage = function (e) {
-        const data = JSON.parse(e.data);
-        console.log("New notification:", data.message);
-        // به‌روزرسانی زنگوله (کد مربوطه را اضافه کن)
-      };
-      socket.onerror = function (e) {
-        console.error("WebSocket error:", e);
-      };
-      socket.onclose = function (e) {
-        console.log("WebSocket closed");
-      };
-    </script>
+<script>
+    (function() {
+        const token = document.getElementById("tokenInput").value.trim();
+        if (!token) return;  // اگر توکن نباشه، وصل نمی‌شیم
+
+        const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+        const wsUrl = `${wsScheme}://${window.location.host}/ws/notifications/?token=${token}`;
+        const socket = new WebSocket(wsUrl);
+
+        socket.onopen = function(e) {
+            console.log("WebSocket connected");
+        };
+
+        socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            console.log("Notification received:", data.message);
+
+            // به‌روزرسانی شمارندهٔ اعلان‌ها (زنگوله)
+            const badge = document.querySelector('[data-notification-badge]');
+            if (badge) {
+                const count = data.unread_count;
+                badge.textContent = count;
+                if (count > 0) {
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+        };
+
+        socket.onerror = function(e) {
+            console.error("WebSocket error:", e);
+        };
+
+        socket.onclose = function(e) {
+            console.log("WebSocket closed, reconnecting in 5s...");
+            setTimeout(() => location.reload(), 5000);
+        };
+    })();
+</script>
   </body>
 </html>
