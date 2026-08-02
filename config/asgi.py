@@ -33,24 +33,20 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 #     ),
 # })
 
+
 import os
 from django.core.asgi import get_asgi_application
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+import todo.routing  # مطمئن شو این ایمپورت درست باشد
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-# فقط در محیط داکر (وقتی USE_REDIS=True) وب‌سوکت را فعال کن
-if os.environ.get('USE_REDIS', 'False').lower() == 'true':
-    from channels.routing import ProtocolTypeRouter, URLRouter
-    from channels.auth import AuthMiddlewareStack
-    import todo.routing
-
-    application = ProtocolTypeRouter({
-        'http': get_asgi_application(),
-        'websocket': AuthMiddlewareStack(
-            URLRouter(
-                todo.routing.websocket_urlpatterns
-            )
-        ),
-    })
-else:
-    application = get_asgi_application()
+application = ProtocolTypeRouter({
+    'http': get_asgi_application(),
+    'websocket': AuthMiddlewareStack(
+        URLRouter(
+            todo.routing.websocket_urlpatterns
+        )
+    ),
+})

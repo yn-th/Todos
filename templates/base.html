@@ -1,151 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}مدیریت تسک‌ها{% endblock %}</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- فونت وزیر (اختیاری) -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap');
-        body { font-family: 'Vazirmatn', 'Tahoma', sans-serif; }
+      @import url("https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap");
+      body {
+        font-family: "Vazirmatn", "Tahoma", sans-serif;
+      }
     </style>
-</head>
-<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
-
+  </head>
+  <body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
     <!-- نوار ناوبری -->
     <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="{% url 'home' %}" class="text-2xl font-bold text-indigo-600">Todo List</a>
-            <div class="flex items-center space-x-4 space-x-reverse">
-                <a href="{% url 'user_feed' %}" class="text-gray-700 hover:text-indigo-600 transition">📰 فید</a>
-                <a href="{% url 'home' %}" class="text-gray-700 hover:text-indigo-600 transition">خانه</a>
-                <a href="{% url 'create' %}" class="text-gray-700 hover:text-indigo-600 transition">ایجاد تسک</a>
-                {% if user.is_authenticated %}
-                    <span class="text-gray-700">{{ user.username }}</span>
-                    {% comment %} <form method="POST" action="{% url 'logout' %}" class="inline">
-                        {% csrf_token %}
-                        <button type="submit" class="text-gray-700 hover:text-indigo-600 transition">خروج</button>
-                    </form> {% endcomment %}
-                {% else %}
-                    <a href="{% url 'login' %}" class="text-gray-700 hover:text-indigo-600 transition">ورود</a>
-                {% endif %}
-                <a href="{% url 'notification_list' %}" class="relative text-gray-700 hover:text-indigo-600 transition">
-    🔔
-                {% if unread_notifications_count > 0 %}
-                    <span class="absolute -top-2 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
-                    {{ unread_notifications_count }}
-                    </span>
-                {% endif %}
-                    </a>
-            </div>
+      <div
+        class="container mx-auto px-4 py-3 flex items-center justify-between"
+      >
+        <a href="{% url 'home' %}" class="text-2xl font-bold text-indigo-600"
+          >Todo List</a
+        >
+        <div class="flex items-center space-x-4 space-x-reverse">
+          <a
+            href="{% url 'user_feed' %}"
+            class="text-gray-700 hover:text-indigo-600 transition"
+            >📰 فید</a
+          >
+          <a
+            href="{% url 'home' %}"
+            class="text-gray-700 hover:text-indigo-600 transition"
+            >خانه</a
+          >
+          <a
+            href="{% url 'create' %}"
+            class="text-gray-700 hover:text-indigo-600 transition"
+            >ایجاد تسک</a
+          >
+          {% if user.is_authenticated %}
+          <span class="text-gray-700">{{ user.username }}</span>
+          {% comment %}
+          <form method="POST" action="{% url 'logout' %}" class="inline">
+            {% csrf_token %}
+            <button
+              type="submit"
+              class="text-gray-700 hover:text-indigo-600 transition"
+            >
+              خروج
+            </button>
+          </form>
+          {% endcomment %} {% else %}
+          <a
+            href="{% url 'login' %}"
+            class="text-gray-700 hover:text-indigo-600 transition"
+            >ورود</a
+          >
+          {% endif %}
+          <a
+            href="{% url 'notification_list' %}"
+            class="relative text-gray-700 hover:text-indigo-600 transition"
+          >
+            🔔 {% if unread_notifications_count > 0 %}
+            <span
+              class="absolute -top-2 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full"
+            >
+              {{ unread_notifications_count }}
+            </span>
+            {% endif %}
+          </a>
         </div>
+      </div>
     </nav>
 
     <!-- محتوای اصلی -->
     <main class="flex-grow container mx-auto px-4 py-8">
-        {% block content %}{% endblock %}
+      {% block content %}{% endblock %}
     </main>
 
     <!-- فوتر -->
     <footer class="bg-white border-t mt-auto">
-        <div class="container mx-auto px-4 py-6 text-center text-gray-500 text-sm">
-            © {% now "Y" %} مدیریت تسک‌ها. تمامی حقوق محفوظ است.
-        </div>
+      <div
+        class="container mx-auto px-4 py-6 text-center text-gray-500 text-sm"
+      >
+        © {% now "Y" %} مدیریت تسک‌ها. تمامی حقوق محفوظ است.
+      </div>
     </footer>
 
-    {% if USE_REDIS %}
-<script>
-    const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const wsUrl = `${wsScheme}://${window.location.host}/ws/notifications/`;
-    const socket = new WebSocket(wsUrl);
+    <script>
+      console.log("WebSocket script loaded");
+      const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+      const wsUrl = `${wsScheme}://${window.location.host}/ws/notifications/`;
+      const socket = new WebSocket(wsUrl);
 
-    socket.onmessage = function(e) {
+      socket.onopen = function (e) {
+        console.log("WebSocket connected successfully!");
+      };
+      socket.onmessage = function (e) {
         const data = JSON.parse(e.data);
-        // ... کد به‌روزرسانی زنگوله
-              const data = JSON.parse(e.data);
-        // به‌روزرسانی شمارندهٔ زنگوله
-        const badge = document.getElementById('notification-badge');
-        if (badge) {
-            if (data.unread_count > 0) {
-                badge.textContent = data.unread_count;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
-        }
-        // نمایش یک توست یا پیام (اختیاری)
-        console.log('New notification:', data.message);
-    };
-</script>
-{% endif %}
-<script>
-    // ۱. تابع کمکی برای گرفتن CSRF Token
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-document.addEventListener('DOMContentLoaded', () => {
-    const statusSelects = document.querySelectorAll('.status-select');
-    const csrftoken = getCookie('csrftoken');
-
-    statusSelects.forEach(select => {
-        select.addEventListener('change', async (event) => {
-            const url = event.target.dataset.changeUrl;  // URL را از اینجا بگیر
-            const newStatus = event.target.value;
-
-            // ساخت FormData
-            const formData = new FormData();
-            formData.append('status', newStatus);
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRFToken': csrftoken,
-                        // Content-Type را خود FormData تنظیم می‌کند
-                    },
-                    body: formData
-                });
-
-                const data = await response.json();
-if (data.success) {
-    const targetId = event.target.dataset.target;
-    const statusSpan = document.getElementById(targetId);
-    if (statusSpan) {
-        statusSpan.textContent = data.new_status;
-    }
-
-    // ۲. (اختیاری) افکت بصری: اضافه کردن کلاس برای یک ثانیه
-    event.target.classList.add('ring-2', 'ring-indigo-500');
-    setTimeout(() => {
-        event.target.classList.remove('ring-2', 'ring-indigo-500');
-    }, 1000);
-}
-               else {
-                    alert(data.error || 'خطا');
-                    event.target.value = event.target.dataset.previousValue;
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('خطا در ارتباط با سرور');
-            }
-        });
-        select.dataset.previousValue = select.value;
-    });
-});
-</script>
-</body>
+        console.log("New notification:", data.message);
+        // به‌روزرسانی زنگوله (کد مربوطه را اضافه کن)
+      };
+      socket.onerror = function (e) {
+        console.error("WebSocket error:", e);
+      };
+      socket.onclose = function (e) {
+        console.log("WebSocket closed");
+      };
+    </script>
+  </body>
 </html>

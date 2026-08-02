@@ -42,7 +42,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'drf_spectacular',
+    'daphne',
     'channels',
+    
 
     'todo',
 ]
@@ -200,8 +202,9 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 
-import os
 
+
+import os
 USE_REDIS = os.environ.get('USE_REDIS', 'True').lower() == 'true'
 
 if USE_REDIS:
@@ -209,14 +212,14 @@ if USE_REDIS:
     CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
     CHANNEL_LAYERS = {
         'default': {
-            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'BACKEND': 'channels.db.DatabaseChannelLayer',
             'CONFIG': {
-                'hosts': [('redis', 6379)],
+                'django_db': 'default',
             },
         },
     }
+  
 else:
-    # برای توسعهٔ محلی: از یک بروکر ساده و لایهٔ InMemory استفاده کن
     CELERY_BROKER_URL = 'memory://'
     CELERY_RESULT_BACKEND = 'cache+memory://'
     CHANNEL_LAYERS = {

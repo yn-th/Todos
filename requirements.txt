@@ -25,3 +25,4 @@ redis
 channels
 channels-redis
 daphne
+channels[database]

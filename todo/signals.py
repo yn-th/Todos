@@ -8,23 +8,51 @@ from channels.layers import get_channel_layer
 @receiver(post_save , sender=Todo)
 
 def create_todo_notif(sender ,instance, created , **kwargs):
+    print(f"SIGNAL TRIGGERED: Todo created for user {instance.assign_to.id}")
     if created:
-        notification =  Notification.objects.create(
-            user = instance.assign_to,
-            message = f"تسک جدیدی به شما ارسال شده است{instance.name}",
-            link=f'/detail/{instance.slug}' 
-        )
-        channel_layer = get_channel_layer()
+        notification = Notification.objects.create(
+        user=instance.assign_to,
+        message=f"تسک جدیدی به شما ارسال شده است: {instance.name}",
+        link=f'/detail/{instance.slug}'
+    )
+    print(f"Notification created for user {notification.user.id}")
+
+    channel_layer = get_channel_layer()
+    group_name = f'user_{notification.user.id}'
+    print(f"Sending to group: {group_name}")
+
+    try:
         async_to_sync(channel_layer.group_send)(
-            f'user_{notification.user.id}',
-    {
-        'type': 'send_notification',
-        'data': {
-            'message': notification.message,
-            'unread_count': Notification.objects.filter(user=notification.user, is_read=False).count(),
-        }
-    }
-)
+            group_name,
+            {
+                'type': 'send_notification',
+                'data': {
+                    'message': notification.message,
+                    'unread_count': Notification.objects.filter(
+                        user=notification.user, is_read=False
+                    ).count(),
+                }
+            }
+        )
+        print(f"Message sent successfully to group {group_name}")
+    except Exception as e:
+        print(f"ERROR sending to group {group_name}: {e}")
+#         notification =  Notification.objects.create(
+#             user = instance.assign_to,
+#             message = f"تسک جدیدی به شما ارسال شده است{instance.name}",
+#             link=f'/detail/{instance.slug}' 
+#         )
+#         channel_layer = get_channel_layer()
+#         async_to_sync(channel_layer.group_send)(
+#             f'user_{notification.user.id}',
+#     {
+#         'type': 'send_notification',
+#         'data': {
+#             'message': notification.message,
+#             'unread_count': Notification.objects.filter(user=notification.user, is_read=False).count(),
+#         }
+#     }
+# )
 
 
 

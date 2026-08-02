@@ -14,4 +14,4 @@ def notification_count(request):
 import os
 
 def use_redis(request):
-    return {'USE_REDIS': os.environ.get('USE_REDIS', 'False').lower() == 'true'}
+    return {'USE_REDIS': os.environ.get('USE_REDIS', 'True').lower() == 'true'}
