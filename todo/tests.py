@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase , override_settings
 from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework.test import APITestCase
@@ -78,3 +78,83 @@ class TodoViewSetTest(APITestCase):
         response = self.client.delete(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Todo.objects.filter(slug=self.todo1.slug).exists())
+
+
+
+from .tasks import debug_task
+
+class CeleryTaskTest(TestCase):
+    
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+    def test_debug_task_runs_successfully(self):
+        """تست می‌کنیم که debug_task بدون خطا اجرا شود و پیام درست را برگرداند."""
+        result = debug_task.delay()
+        self.assertTrue(result.successful())
+        self.assertEqual(result.result, "Task completed successfully")
+
+
+from .tasks import send_due_date_reminders
+
+class CeleryTaskTest(TestCase):
+    
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+    def test_send_reminder_for_today_tasks(self):
+        """تسکی با سررسید امروز باید باعث ارسال ایمیل شود."""
+        # ۱. ساخت یک کاربر با ایمیل معتبر
+        user = User.objects.create_user(username='testuser', email='test@example.com')
+        
+        # ۲. ساخت یک تسک با سررسید امروز و وضعیت SE
+        Todo.objects.create(
+            name='تسک تستی',
+            due_date=date.today(),
+            status='SE',
+            assign_to=user
+        )
+        
+        # ۳. اجرای Task
+        result = send_due_date_reminders.delay()
+        
+        # ۴. بررسی موفقیت Task
+        self.assertTrue(result.successful())
+        
+        # ۵. بررسی اینکه یک ایمیل ارسال شده است
+        from django.core import mail
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('تسک تستی', mail.outbox[0].body)
+
+
+from datetime import timedelta
+from django.utils import timezone
+from .models import Notification
+from .tasks import cleanup_old_notifications
+
+class CeleryTaskTest(TestCase):
+    
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+    def test_cleanup_old_notifications(self):
+        user = User.objects.create_user(username='testuser2')
+        
+        # ۱. ساخت یک اعلان قدیمی (۳۵ روز پیش)
+        old_notif = Notification.objects.create(
+            user=user,
+            message='اعلان قدیمی',
+            is_read=True
+        )
+        old_notif.created = timezone.now() - timedelta(days=35)
+        old_notif.save()
+        
+        # ۲. ساخت یک اعلان جدید
+        Notification.objects.create(
+            user=user,
+            message='اعلان جدید',
+            is_read=True
+        )
+        
+        # ۳. اجرای Task
+        result = cleanup_old_notifications.delay()
+        self.assertTrue(result.successful())
+        
+        # ۴. فقط اعلان قدیمی باید حذف شده باشد
+        self.assertFalse(Notification.objects.filter(message='اعلان قدیمی').exists())
+        self.assertTrue(Notification.objects.filter(message='اعلان جدید').exists())
+        self.assertEqual(result.result, 1)  # تعداد حذف‌شده
